@@ -196,3 +196,5 @@ if __name__ == '__main__':
     Scraper.get_image
     Scraper.get_info
     
+import pandas as pd 
+pd.DataFrame(product_dictionary)
