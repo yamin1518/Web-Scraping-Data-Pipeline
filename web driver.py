@@ -49,7 +49,8 @@ class Scraper:
         PATH = "/Users/yamz/Desktop/chromedriver"
         self.driver = webdriver.Chrome(PATH)
         self.driver.get('https://www.hsamuel.co.uk/webstore/l/mens-jewellery/')
-        self.get_product_details()
+        self._get_product_info(self._get_products())
+        print(product)
 
 
     def cookies(self):
@@ -91,6 +92,7 @@ class Scraper:
             product = self._get_product_info(product_info)
             print(product)
             break
+        return product
 
     def _get_product_info(self, product_info):
         """This will get all the relevant information needed for the producst such as the name, price, sku and image
@@ -121,7 +123,7 @@ class Scraper:
 
         img = product_info.find_element(By.XPATH , '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/div[1]/a/div/a/picture/img')
         src = img.get_attribute('src')
-        product_link = src.strip('https://www.hsamuel.co.uk/webstore/').split('/')[2]
+        product_link = src.strip('https://www.hsamuel.co.uk/webstore/').split('/')[1]
         product_folder = f'images{product_link}'
         if os.path.isdir(product_folder):
             pass
