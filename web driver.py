@@ -1,16 +1,16 @@
 #%% 
-from lib2to3.pgen2 import driver
-from selenium import webdriver
-from selenium.webdriver.common.by import By 
+import pandas as pd 
 import requests
 import time
 import os
 import uuid
 import json
+from lib2to3.pgen2 import driver
+from selenium import webdriver
+from selenium.webdriver.common.by import By 
 """
 List of things that I have tried to  implement
 
-1) accept cookies 
 2) navigate through the website
 3) get the product name, price, sku 
 4) set the sku number as the unique id using uuid4
@@ -20,6 +20,10 @@ List of things that I have tried to  implement
 
 I am having some issues with steps 4-6
 started testing not sure if i am doing it right
+
+
+Create a scrape method which will run the entire scraping process.
+Method will click cookies button, then get all category links, navigate to category and return all products then store. 
 
 """
 
@@ -47,10 +51,10 @@ class Scraper:
                 It will load up the page and then return the product details
         """
         PATH = "/Users/yamz/Desktop/chromedriver"
-        self.driver = webdriver.Chrome(PATH)
+        self.driver = webdriver.Chrome()
         self.driver.get('https://www.hsamuel.co.uk/webstore/l/mens-jewellery/')
-        self._get_product_info(self._get_products())
-        print(product)
+        #self._get_product_info(self._get_products())
+        #print(product)
 
 
     def cookies(self):
@@ -65,19 +69,8 @@ class Scraper:
         time.sleep(2) 
         accept_cookies_button = self.driver.find_element_by_xpath('//*[@id="js-cookie-consent-overlay"]/div[1]/div/button[1]')
         accept_cookies_button.click()
-
+        return
     
-    def get_info(self):
-        """This will gett he product information 
-
-            Args:
-                 Takes in the self argument
-
-            Returns:
-                It will use the _get_products function
-        """
-        self._get_products()
-
     def _get_products(self):
         """This will look at the website nad look for ht products
 
@@ -87,14 +80,17 @@ class Scraper:
             Returns:
                 It will load up the page and then look for the products and the details required
         """
-        product_infos = self.driver.find_elements(By.XPATH, '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/a[1]')
-        for product_info in product_infos:
-            product = self._get_product_info(product_info)
-            print(product)
-            break
-        return product
+        product_list= []
+        product_info_container = self.driver.find_elements(By.XPATH, '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/a[1]')
+        for product_element in product_info_container:
+            ## TODO Could find elements by attribute to get SKUS
+            product_list.append(self._get_product_details(product_element))
 
-    def _get_product_info(self, product_info):
+            print(product_element)
+            break
+        return product_list
+
+    def _get_product_details(self, product_info):
         """This will get all the relevant information needed for the producst such as the name, price, sku and image
 
             Args:
@@ -111,14 +107,13 @@ class Scraper:
         print(name.text)
         product['name'] = name
 
-
         price = product_info.find_element(By.XPATH, '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/a[2]/div/span[1]')
         print(price.text)
         product['price'] = price
 
         sku = product_info.find_element(By.XPATH, '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/div[1]/a/div/a/picture/img')
         print(sku.text)
-        product['sku'] = sku 
+        product['sku'] = sku + str(uuid.uuid4())
 
 
         img = product_info.find_element(By.XPATH , '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/div[1]/a/div/a/picture/img')
@@ -135,27 +130,10 @@ class Scraper:
         product['img_src'] = src
         return product
 
-    def create_dictionary(self, get_info):
-
-        #I tried to use the product informationt hat i created beofre to gett he name, price, sku and image and tried to pass it intot his function
-
-        #I then tried to put these information into a JSON file with the SKU have a unique ID
-        product_dictionary =  {}
-
-        product_dictonary.update(
-            {
-                "product_name": name, 
-                "sku": str(uuid.uuid4()), 
-                "price": price,
-                "image": image
-
-            })
-        return product_dictionary
-
     def save_product_dictionary(self, product_dictionary):
         with open("", 'w') as outfile:
             json.dump(f"product_{SKU}", outfile)
-            
+           
     @staticmethod
     def get_image(url, path):
         """This will download the images for the product
@@ -194,9 +172,8 @@ class Scraper:
 # %%
 if __name__ == '__main__':
     scraper = Scraper()
-    Scraper.cookies
-    Scraper.get_image
-    Scraper.get_info
+    scraper.cookies()
+    products = scraper._get_products()
     
-import pandas as pd 
-pd.DataFrame(product_dictionary)
+
+#pd.DataFrame(product_dictionary)
