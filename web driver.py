@@ -1,4 +1,5 @@
 #%% 
+from http import cookies
 import pandas as pd 
 import requests
 import time
@@ -56,6 +57,16 @@ class Scraper:
         #self._get_product_info(self._get_products())
         #print(product)
 
+    def run_everything(self):
+        self.cookies
+        self.navigate_website
+        self._get_products
+        self._get_product_details
+        self.save_product_dictionary
+        self.get_image
+        self.save_df
+
+        pass
 
     def cookies(self):
         """This function will accept any cookies one the page
@@ -168,12 +179,16 @@ class Scraper:
                     driver.get(link)
             return
 
+        
+    def save_df():
+        pd.DataFrame(product_dictionary)
+        pd.to_csv('ring.csv')
+
 
 # %%
 if __name__ == '__main__':
     scraper = Scraper()
-    scraper.cookies()
-    products = scraper._get_products()
+    scraper.run_everything()
     
 
-#pd.DataFrame(product_dictionary)
+#
