@@ -98,7 +98,6 @@ class Scraper:
             product_list.append(self._get_product_details(product_element))
 
             print(product_element)
-            break
         return product_list
 
     def _get_product_details(self, product_info):
