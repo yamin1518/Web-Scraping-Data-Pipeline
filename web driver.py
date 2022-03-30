@@ -54,17 +54,12 @@ class Scraper:
         PATH = "/Users/yamz/Desktop/chromedriver"
         self.driver = webdriver.Chrome()
         self.driver.get('https://www.hsamuel.co.uk/webstore/l/mens-jewellery/')
-        #self._get_product_info(self._get_products())
-        #print(product)
+        self.products_df = pd.DataFrame(columns=["name", "Price", "SKU"])
 
     def run_everything(self):
-        self.cookies
-        self.navigate_website
-        self._get_products
-        self._get_product_details
-        self.save_product_dictionary
-        self.get_image
-        self.save_df
+        self.cookies()
+        self.navigate_website()
+        self._get_products()
 
         pass
 
@@ -92,12 +87,11 @@ class Scraper:
                 It will load up the page and then look for the products and the details required
         """
         product_list= []
-        product_info_container = self.driver.find_elements(By.XPATH, '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/a[1]')
+        #product_info_container = self.driver.find_elements(By.XPATH, '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/a[1]')
+        product_info_container = self.driver.find_elements(By.XPATH, '//div[@class="product-listing__product--list"]//div[@class="c-product-card__image-container"]/a')
         for product_element in product_info_container:
             ## TODO Could find elements by attribute to get SKUS
             product_list.append(self._get_product_details(product_element))
-
-            print(product_element)
         return product_list
 
     def _get_product_details(self, product_info):
@@ -115,15 +109,15 @@ class Scraper:
 
         name = product_info.find_element(By.XPATH, '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/a[2]/div/span[1]')
         print(name.text)
-        product['name'] = name
+        product['name'] = name.text
 
         price = product_info.find_element(By.XPATH, '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/a[2]/div/span[1]')
         print(price.text)
-        product['price'] = price
+        product['price'] = price.text
 
         sku = product_info.find_element(By.XPATH, '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/div[1]/a/div/a/picture/img')
-        print(sku.text)
-        product['sku'] = sku + str(uuid.uuid4())
+        print(type(sku))
+        product['sku'] = sku.text + str(uuid.uuid4())
 
 
         img = product_info.find_element(By.XPATH , '//*[@id="access-content"]/div[1]/div/div[4]/div[2]/div/div[1]/div[2]/div[1]/a/div/a/picture/img')
@@ -138,12 +132,17 @@ class Scraper:
         self.get_image(src, f'{product_folder}/0.jpg')
 
         product['img_src'] = src
+        ## TODO add in save product dictionary
+        self._save_product_dictionary(product)#
+        self._append_product_to_df(product)
+
         return product
 
-    def save_product_dictionary(self, product_dictionary):
-        with open("", 'w') as outfile:
-            json.dump(f"product_{SKU}", outfile)
-           
+    def _save_product_dictionary(self, product_dictionary):
+        with open(f"{product_dictionary['sku']}", 'w') as outfile:
+            json.dump(product_dictionary, outfile)
+        return
+
     @staticmethod
     def get_image(url, path):
         """This will download the images for the product
@@ -159,11 +158,12 @@ class Scraper:
         img_data = requests.get(url).content
         with open (path, 'wb') as handler : 
             handler.write(img_data)
+        return
 
 
-    def navigate_website():
+    def navigate_website(self):
 
-        nav_bar = driver.find_elements_by_xpath("//ul[@id='js-main-nav-container']//a")
+        nav_bar = self.driver.find_elements_by_xpath("//ul[@id='js-main-nav-container']//a")
 
         category_list = []
 
@@ -179,9 +179,10 @@ class Scraper:
             return
 
         
-    def save_df():
-        pd.DataFrame(product_dictionary)
-        pd.to_csv('ring.csv')
+    def _append_product_to_df(self, product_dictionary):
+        self.products_df.append(product_dictionary, ignore_index=True)
+        #pd.to_csv('ring.csv')
+        return
 
 
 # %%
