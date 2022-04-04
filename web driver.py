@@ -52,7 +52,7 @@ class Scraper:
                 It will load up the page and then return the product details
         """
         PATH = "/Users/yamz/Desktop/chromedriver"
-        self.driver = webdriver.Chrome()
+        self.driver = webdriver.Chrome(PATH)
         self.driver.get('https://www.hsamuel.co.uk/webstore/l/mens-jewellery/')
         self.products_df = pd.DataFrame(columns=["name", "Price", "SKU"])
 
